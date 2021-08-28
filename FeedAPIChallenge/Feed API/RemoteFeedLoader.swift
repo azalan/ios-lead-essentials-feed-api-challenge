@@ -33,9 +33,18 @@ public final class RemoteFeedLoader: FeedLoader {
 private extension RemoteFeedLoader {
 	static let OK_200: Int = 200
 
+	struct Root: Decodable {
+		let items: [Item]
+	}
+
+	struct Item: Decodable {
+		let imageId: UUID
+		let imageUrl: URL
+	}
+
 	static func map(_ data: Data, from response: HTTPURLResponse) -> FeedLoader.Result {
 		guard response.statusCode == OK_200,
-		      let _ = try? JSONSerialization.jsonObject(with: data) else {
+		      let _ = try? JSONDecoder().decode(Root.self, from: data) else {
 			return .failure(Error.invalidData)
 		}
 		return .success([])
