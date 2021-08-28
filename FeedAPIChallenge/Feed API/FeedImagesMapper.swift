@@ -13,6 +13,10 @@ internal final class FeedImagesMapper {
 
 	private struct Root: Decodable {
 		let items: [Item]
+
+		var feed: [FeedImage] {
+			items.map(\.feedImage)
+		}
 	}
 
 	private struct Item: Decodable {
@@ -20,6 +24,10 @@ internal final class FeedImagesMapper {
 		let imageDesc: String?
 		let imageLoc: String?
 		let imageUrl: URL
+
+		var feedImage: FeedImage {
+			FeedImage(id: imageId, description: imageDesc, location: imageLoc, url: imageUrl)
+		}
 	}
 
 	internal static func map(_ data: Data, from response: HTTPURLResponse) -> FeedLoader.Result {
@@ -27,7 +35,7 @@ internal final class FeedImagesMapper {
 		      let root = try? jsonDecoder.decode(Root.self, from: data) else {
 			return .failure(RemoteFeedLoader.Error.invalidData)
 		}
-		return .success(root.items.map { FeedImage(id: $0.imageId, description: $0.imageDesc, location: $0.imageLoc, url: $0.imageUrl) })
+		return .success(root.feed)
 	}
 
 	private static var jsonDecoder: JSONDecoder {
