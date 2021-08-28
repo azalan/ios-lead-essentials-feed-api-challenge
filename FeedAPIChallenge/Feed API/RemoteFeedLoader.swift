@@ -39,14 +39,20 @@ private extension RemoteFeedLoader {
 
 	struct Item: Decodable {
 		let imageId: UUID
+		let imageDesc: String?
+		let imageLoc: String?
 		let imageUrl: URL
 	}
 
 	static func map(_ data: Data, from response: HTTPURLResponse) -> FeedLoader.Result {
-		guard response.statusCode == OK_200,
-		      let _ = try? JSONDecoder().decode(Root.self, from: data) else {
+		guard response.statusCode == OK_200 else {
 			return .failure(Error.invalidData)
 		}
-		return .success([])
+		let decoder = JSONDecoder()
+		decoder.keyDecodingStrategy = .convertFromSnakeCase
+		if let root = try? decoder.decode(Root.self, from: data) {
+			return .success(root.items.map { FeedImage(id: $0.imageId, description: $0.imageDesc, location: $0.imageLoc, url: $0.imageUrl) })
+		}
+		return .failure(Error.invalidData)
 	}
 }
