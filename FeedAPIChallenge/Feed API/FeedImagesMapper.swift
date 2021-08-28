@@ -26,11 +26,15 @@ internal final class FeedImagesMapper {
 		guard response.statusCode == OK_200 else {
 			return .failure(RemoteFeedLoader.Error.invalidData)
 		}
-		let decoder = JSONDecoder()
-		decoder.keyDecodingStrategy = .convertFromSnakeCase
-		if let root = try? decoder.decode(Root.self, from: data) {
+		if let root = try? jsonDecoder.decode(Root.self, from: data) {
 			return .success(root.items.map { FeedImage(id: $0.imageId, description: $0.imageDesc, location: $0.imageLoc, url: $0.imageUrl) })
 		}
 		return .failure(RemoteFeedLoader.Error.invalidData)
+	}
+
+	private static var jsonDecoder: JSONDecoder {
+		let decoder = JSONDecoder()
+		decoder.keyDecodingStrategy = .convertFromSnakeCase
+		return decoder
 	}
 }
