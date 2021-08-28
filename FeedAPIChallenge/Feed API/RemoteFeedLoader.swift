@@ -22,16 +22,21 @@ public final class RemoteFeedLoader: FeedLoader {
 		client.get(from: url) { result in
 			switch result {
 			case let .success((_, response)):
-				if response.statusCode == Self.OK_200 {
-					completion(.success([]))
-				} else {
-					completion(.failure(Error.invalidData))
-				}
+				completion(Self.map(from: response))
 			default:
 				completion(.failure(Error.connectivity))
 			}
 		}
 	}
+}
 
-	private static let OK_200: Int = 200
+private extension RemoteFeedLoader {
+	static let OK_200: Int = 200
+
+	static func map(from response: HTTPURLResponse) -> FeedLoader.Result {
+		guard response.statusCode == OK_200 else {
+			return .failure(Error.invalidData)
+		}
+		return .success([])
+	}
 }
