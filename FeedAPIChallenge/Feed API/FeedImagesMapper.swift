@@ -36,7 +36,7 @@ enum FeedImagesMapper {
 		return decoder
 	}
 
-	internal static func map(_ data: Data, from response: HTTPURLResponse) -> FeedLoader.Result {
+	static func map(_ data: Data, from response: HTTPURLResponse) -> FeedLoader.Result {
 		guard response.statusCode == OK_200,
 		      let root = try? jsonDecoder.decode(Root.self, from: data) else {
 			return .failure(RemoteFeedLoader.Error.invalidData)
